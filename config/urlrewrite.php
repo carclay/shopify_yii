@@ -6,6 +6,7 @@ return [
     'token' => 'site/token',
     'api' => 'site/api',
     'import' => 'site/import',
+    'ajax' => 'site/ajax',
     'logout' => 'site/logout',
     'catalog' => 'site/catalog/',
     'profile' => 'site/profile/',

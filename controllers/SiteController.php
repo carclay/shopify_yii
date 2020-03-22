@@ -2,6 +2,9 @@
 
 namespace app\controllers;
 
+use app\models\Import;
+use app\models\ProductList;
+use app\models\Products;
 use app\models\Shopify;
 use Yii;
 use yii\filters\AccessControl;
@@ -91,10 +94,19 @@ class SiteController extends Controller
         ];
     }
 
+    public function actionAjax(){
+        if(!\Yii::$app->request->isAjax){
+            $this->goBack();
+        }
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $import = new Import($_REQUEST['shop']);
+        return $import->getStateAjax();
+    }
+
+
     /**
-     * Displays homepage.
-     *
-     * @return string
+     * @return array|string|Response
      * @throws \Exception
      */
     public function actionIndex()
@@ -110,7 +122,16 @@ class SiteController extends Controller
             $model = new Shopify();
             return $this->redirect($model->getInstallUrl());
         }
-        return $this->render('index');
+        $model = new ProductList();
+
+        if(\Yii::$app->request->isAjax){
+            \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            return $model->getResult();
+        }else{
+            return $this->render('index',[
+                'arResult' => $model->getResult(),
+            ]);
+        }
     }
 
     /**
@@ -126,7 +147,10 @@ class SiteController extends Controller
     public function actionApi()
     {
         Header('Access-Control-Allow-Origin: *');
-        dump($_REQUEST);
+        if($product = Products::find()->where(["product_id" => intval($_REQUEST["productId"])])->one()){
+            $product->views += 1;
+            $product->save();
+        }
     }
 
     public function actionImport(){

@@ -43,6 +43,10 @@ class Shopify
         $this->curl = new Curl();
     }
 
+    /**
+     * @param $shop
+     * @return $this
+     */
     public function setShop($shop){
         $this->shop = $shop;
         return $this;
@@ -119,6 +123,16 @@ class Shopify
         }
         $rsToken->shop_name = htmlspecialchars($_REQUEST["shop"]);
         $rsToken->token = $token;
+
+        // save company
+
+        if(!$rsShop = Shops::find()->where([
+            "shop" => htmlspecialchars($_REQUEST["shop"])
+        ])->one()){
+            $rsShop = new Shops();
+        }
+        $rsShop->shop = htmlspecialchars($_REQUEST["shop"]);
+        $rsShop->save();
         return $rsToken->save();
     }
 

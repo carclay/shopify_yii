@@ -69,14 +69,24 @@ Class Curl
     {
         $re = '/(.+?); rel="(.+?)"/m';
         $str = str_replace(["<",">"],"", $this->getHeaders()["Link"]);
-        preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
-        $matches = current($matches);
 
-        if($matches[2] !== 'next'){
+        preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
+
+        $hasNext = false;
+        $link = false;
+        foreach($matches as $match){
+            if($match[2] !== 'next'){
+                continue;
+            }
+            $link = trim($match[1], ', ');
+            $hasNext = true;
+        }
+
+        if(!$hasNext){
             return false;
         }
 
-        $nextPageURLparam = parse_url($matches[1]);
+        $nextPageURLparam = parse_url($link);
 
         parse_str($nextPageURLparam['query'], $value);
         return strlen($value['page_info']) > 0 ? $value['page_info'] : false;
@@ -87,15 +97,24 @@ Class Curl
         $re = '/(.+?); rel="(.+?)"/m';
         $str = str_replace(["<",">"],"", $this->getHeaders()["Link"]);
         preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
-        $matches = current($matches);
 
-        if($matches[2] !== 'previous'){
+        $hasPrev = false;
+        $link = false;
+        foreach($matches as $match){
+            if($match[2] !== 'previous'){
+                continue;
+            }
+            $link = trim($match[1], ', ');
+            $hasPrev = true;
+        }
+
+        if(!$hasPrev){
             return false;
         }
 
-        $nextPageURLparam = parse_url($matches[1]);
+        $prevPageURLparam = parse_url($link);
 
-        parse_str($nextPageURLparam['query'], $value);
+        parse_str($prevPageURLparam['query'], $value);
         return strlen($value['page_info']) > 0 ? $value['page_info'] : false;
     }
 
